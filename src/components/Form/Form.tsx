@@ -1,17 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, set } from "react-hook-form";
 
+import ChooseFile from "@/components/ChooseFile";
 import Input from "@/components/Input";
+import Select from "@/components/Select/Select";
 
 import {
   secret_validation,
   delimiter_validation,
   type_validation,
 } from "@/utils/patterns";
-
-import Select from "../Select/Select";
 
 enum TypeEnum {
   XML = "XML",
@@ -34,6 +34,7 @@ const Form = () => {
   const [destinyText, setDestinyText] = useState<string>("");
   const [destinyType, setDestinyType] = useState<TypeEnum>();
   const [destinyName, setDestinyName] = useState<string>("destiny");
+  const [error, setError] = useState<string>("");
 
   const {
     register,
@@ -48,6 +49,7 @@ const Form = () => {
   ];
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    setError("");
     const fromType = data.origin[0].type;
     const toType = data.type;
 
@@ -68,7 +70,10 @@ const Form = () => {
       url += "/json-to-txt";
       setDestinyType(TypeEnum.TXT);
     } else {
-      console.log("error");
+      setError(
+        `You can't convert file type ${fromType} to file type ${toType}`
+      );
+      return;
     }
 
     const formData = new FormData();
@@ -94,7 +99,7 @@ const Form = () => {
       const text = await file.text();
       setDestinyText(text);
     } catch (error) {
-      console.log(error);
+      setError("Something went wrong");
     }
   };
 
@@ -114,21 +119,6 @@ const Form = () => {
     link.click();
 
     setIsDownloading(false);
-  };
-
-  const handleOnChangeOrigin = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-
-    const file = e.target.files[0];
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      const text = reader.result;
-      if (typeof text === "string") setOriginText(text);
-    };
-
-    reader.readAsText(file);
   };
 
   return (
@@ -165,22 +155,22 @@ const Form = () => {
         pattern={type_validation}
         required
       />
-      <div className="col-span-3 flex flex-col space-y-4">
-        <label htmlFor="origin" className="capitalize color-ari-black w-fit">
-          Origin file
-        </label>
-        <input
-          id="origin"
-          className="w-fit"
-          type="file"
-          placeholder="Select your type"
-          {...register("origin")}
-          onChange={handleOnChangeOrigin}
-        />
-        <div className="bg-ari-gray p-2 rounded border border-solid border-ari-black w-full min-h-[200px] whitespace-normal break-words">
-          {originText}
-        </div>
-      </div>
+      <ChooseFile
+        register={register}
+        placeholder="Select your type"
+        name="origin"
+        label="Origin file"
+        setText={setOriginText}
+        text={originText}
+        accept={".txt, .xml, .json"}
+        error={errors.origin}
+        validate={(fileList) =>
+          fileList[0].type === "text/plain" ||
+          fileList[0].type === "application/json" ||
+          fileList[0].type === "application/xml" ||
+          fileList[0].type === "text/xml"
+        }
+      />
       <div className="col-span-3 flex flex-col space-y-4">
         <label htmlFor="destiny" className="capitalize color-ari-black">
           Destiny file
@@ -201,6 +191,9 @@ const Form = () => {
         className="bg-ari-gray p-2 rounded border border-solid border-ari-black"
         type="submit"
       />
+      {error && (
+        <span className="col-span-5 text-end pt-1 text-red-500">{error}</span>
+      )}
     </form>
   );
 };
