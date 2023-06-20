@@ -6,6 +6,10 @@ const Input: React.FC<InputProps> = ({
   placeholder,
   register,
   error,
+  required,
+  minLength,
+  maxLength,
+  pattern,
 }) => {
   return (
     <div className={`${classes} flex flex-col space-y-4`}>
@@ -15,13 +19,34 @@ const Input: React.FC<InputProps> = ({
       <div>
         <input
           id={label}
-          className="bg-ari-gray p-2 rounded border border-solid border-ari-black w-full"
           placeholder={placeholder}
-          {...register(label, { required: true })}
+          aria-invalid={error ? "true" : "false"}
+          {...register(label, { required, minLength, maxLength, pattern })}
+          className="bg-ari-gray p-2 rounded border border-solid border-ari-black w-full"
         />
         {error && error.type === "required" && (
           <span role="alert" className="pt-1 text-red-500">
             This field is required
+          </span>
+        )}
+        {error && error.type === "maxLength" && (
+          <span role="alert" className="pt-1 text-red-500">
+            Max length exceeded
+          </span>
+        )}
+        {error && error.type === "minLength" && (
+          <span role="alert" className="pt-1 text-red-500">
+            Min length not met
+          </span>
+        )}
+        {error && error.type === "pattern" && (
+          <span role="alert" className="pt-1 text-red-500">
+            Invalid input
+          </span>
+        )}
+        {error && error.type === "validate" && (
+          <span role="alert" className="pt-1 text-red-500">
+            Invalid input
           </span>
         )}
       </div>

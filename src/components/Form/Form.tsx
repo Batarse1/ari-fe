@@ -5,6 +5,8 @@ import { useForm, SubmitHandler } from "react-hook-form";
 
 import Input from "@/components/Input";
 
+import { secret_validation, delimiter_validation } from "@/utils/patterns";
+
 import Select from "../Select/Select";
 
 enum TypeEnum {
@@ -128,7 +130,9 @@ const Form = () => {
         classes="col-span-2"
         label="secret"
         placeholder="Enter your secret"
+        pattern={secret_validation}
         register={register}
+        required
         error={errors.secret}
       />
       <Input
@@ -136,7 +140,9 @@ const Form = () => {
         label="delimiter"
         placeholder="Enter your delimiter"
         register={register}
+        required
         error={errors.delimiter}
+        pattern={delimiter_validation}
       />
       <Select
         classes="col-span-2"
