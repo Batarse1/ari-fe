@@ -7,6 +7,9 @@ interface InputProps {
   error: FieldError | undefined;
   classes?: string;
   required?: boolean;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: RegExp;
 }
 
 export type { InputProps };

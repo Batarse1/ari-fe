@@ -1,11 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, set } from "react-hook-form";
 
+import ChooseFile from "@/components/ChooseFile";
 import Input from "@/components/Input";
+import Select from "@/components/Select/Select";
 
-import Select from "../Select/Select";
+import {
+  secret_validation,
+  delimiter_validation,
+  type_validation,
+} from "@/utils/patterns";
 
 enum TypeEnum {
   XML = "XML",
@@ -28,6 +34,7 @@ const Form = () => {
   const [destinyText, setDestinyText] = useState<string>("");
   const [destinyType, setDestinyType] = useState<TypeEnum>();
   const [destinyName, setDestinyName] = useState<string>("destiny");
+  const [error, setError] = useState<string>("");
 
   const {
     register,
@@ -35,7 +42,14 @@ const Form = () => {
     formState: { errors },
   } = useForm<Inputs>();
 
+  const options = [
+    { value: TypeEnum.XML, label: TypeEnum.XML },
+    { value: TypeEnum.JSON, label: TypeEnum.JSON },
+    { value: TypeEnum.TXT, label: TypeEnum.TXT },
+  ];
+
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    setError("");
     const fromType = data.origin[0].type;
     const toType = data.type;
 
@@ -56,7 +70,10 @@ const Form = () => {
       url += "/json-to-txt";
       setDestinyType(TypeEnum.TXT);
     } else {
-      console.log("error");
+      setError(
+        `You can't convert file type ${fromType} to file type ${toType}`
+      );
+      return;
     }
 
     const formData = new FormData();
@@ -82,7 +99,7 @@ const Form = () => {
       const text = await file.text();
       setDestinyText(text);
     } catch (error) {
-      console.log(error);
+      setError("Something went wrong");
     }
   };
 
@@ -104,64 +121,58 @@ const Form = () => {
     setIsDownloading(false);
   };
 
-  const handleOnChangeOrigin = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-
-    const file = e.target.files[0];
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      const text = reader.result;
-      if (typeof text === "string") setOriginText(text);
-    };
-
-    reader.readAsText(file);
-  };
-
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="grid grid-cols-6 gap-12 w-full"
+      className="grid grid-cols-1 md:grid-cols-6 gap-12 w-full"
     >
       <Input
-        classes="col-span-2"
+        classes="md:col-span-6 lg:col-span-2"
         label="secret"
         placeholder="Enter your secret"
+        pattern={secret_validation}
         register={register}
+        required
         error={errors.secret}
       />
       <Input
-        classes="col-span-2"
+        classes="md:col-span-6 lg:col-span-2"
         label="delimiter"
         placeholder="Enter your delimiter"
         register={register}
+        required
         error={errors.delimiter}
+        pattern={delimiter_validation}
       />
       <Select
-        classes="col-span-2"
+        name="type"
+        classes="md:col-span-6 lg:col-span-2"
+        options={options}
         label="convert to type (XML, JSON, TXT)"
         placeholder="Select your type"
         register={register}
         error={errors.type}
+        pattern={type_validation}
+        required
       />
-      <div className="col-span-3 flex flex-col space-y-4">
-        <label htmlFor="origin" className="capitalize color-ari-black w-fit">
-          Origin file
-        </label>
-        <input
-          id="origin"
-          className="w-fit"
-          type="file"
-          placeholder="Select your type"
-          {...register("origin")}
-          onChange={handleOnChangeOrigin}
-        />
-        <div className="bg-ari-gray p-2 rounded border border-solid border-ari-black w-full min-h-[200px] whitespace-normal break-words">
-          {originText}
-        </div>
-      </div>
-      <div className="col-span-3 flex flex-col space-y-4">
+      <ChooseFile
+        register={register}
+        classes="md:col-span-3"
+        placeholder="Select your type"
+        name="origin"
+        label="Origin file"
+        setText={setOriginText}
+        text={originText}
+        accept={".txt, .xml, .json"}
+        error={errors.origin}
+        validate={(fileList) =>
+          fileList[0].type === "text/plain" ||
+          fileList[0].type === "application/json" ||
+          fileList[0].type === "application/xml" ||
+          fileList[0].type === "text/xml"
+        }
+      />
+      <div className="md:col-span-3 flex flex-col space-y-4">
         <label htmlFor="destiny" className="capitalize color-ari-black">
           Destiny file
         </label>
@@ -177,8 +188,13 @@ const Form = () => {
           {destinyText}
         </div>
       </div>
+      {error && (
+        <span className="md:col-span-4 lg:col-span-5 md:row-start-5 lg:row-start-3 md:col-start-3 lg:col-start-2 text-end pt-1 text-red-500">
+          {error}
+        </span>
+      )}
       <input
-        className="bg-ari-gray p-2 rounded border border-solid border-ari-black"
+        className="bg-ari-gray p-2 md:col-start-1 md:col-span-2 lg:col-span-1 rounded border border-solid border-ari-black"
         type="submit"
       />
     </form>
