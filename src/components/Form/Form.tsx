@@ -5,7 +5,11 @@ import { useForm, SubmitHandler } from "react-hook-form";
 
 import Input from "@/components/Input";
 
-import { secret_validation, delimiter_validation } from "@/utils/patterns";
+import {
+  secret_validation,
+  delimiter_validation,
+  type_validation,
+} from "@/utils/patterns";
 
 import Select from "../Select/Select";
 
@@ -36,6 +40,12 @@ const Form = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<Inputs>();
+
+  const options = [
+    { value: TypeEnum.XML, label: TypeEnum.XML },
+    { value: TypeEnum.JSON, label: TypeEnum.JSON },
+    { value: TypeEnum.TXT, label: TypeEnum.TXT },
+  ];
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     const fromType = data.origin[0].type;
@@ -145,11 +155,15 @@ const Form = () => {
         pattern={delimiter_validation}
       />
       <Select
+        name="type"
         classes="col-span-2"
+        options={options}
         label="convert to type (XML, JSON, TXT)"
         placeholder="Select your type"
         register={register}
         error={errors.type}
+        pattern={type_validation}
+        required
       />
       <div className="col-span-3 flex flex-col space-y-4">
         <label htmlFor="origin" className="capitalize color-ari-black w-fit">
