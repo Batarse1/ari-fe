@@ -124,10 +124,10 @@ const Form = () => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="grid grid-cols-6 gap-12 w-full"
+      className="grid grid-cols-1 md:grid-cols-6 gap-12 w-full"
     >
       <Input
-        classes="col-span-2"
+        classes="md:col-span-6 lg:col-span-2"
         label="secret"
         placeholder="Enter your secret"
         pattern={secret_validation}
@@ -136,7 +136,7 @@ const Form = () => {
         error={errors.secret}
       />
       <Input
-        classes="col-span-2"
+        classes="md:col-span-6 lg:col-span-2"
         label="delimiter"
         placeholder="Enter your delimiter"
         register={register}
@@ -146,7 +146,7 @@ const Form = () => {
       />
       <Select
         name="type"
-        classes="col-span-2"
+        classes="md:col-span-6 lg:col-span-2"
         options={options}
         label="convert to type (XML, JSON, TXT)"
         placeholder="Select your type"
@@ -157,6 +157,7 @@ const Form = () => {
       />
       <ChooseFile
         register={register}
+        classes="md:col-span-3"
         placeholder="Select your type"
         name="origin"
         label="Origin file"
@@ -171,7 +172,7 @@ const Form = () => {
           fileList[0].type === "text/xml"
         }
       />
-      <div className="col-span-3 flex flex-col space-y-4">
+      <div className="md:col-span-3 flex flex-col space-y-4">
         <label htmlFor="destiny" className="capitalize color-ari-black">
           Destiny file
         </label>
@@ -187,13 +188,15 @@ const Form = () => {
           {destinyText}
         </div>
       </div>
+      {error && (
+        <span className="md:col-span-4 lg:col-span-5 md:row-start-5 lg:row-start-3 md:col-start-3 lg:col-start-2 text-end pt-1 text-red-500">
+          {error}
+        </span>
+      )}
       <input
-        className="bg-ari-gray p-2 rounded border border-solid border-ari-black"
+        className="bg-ari-gray p-2 md:col-start-1 md:col-span-2 lg:col-span-1 rounded border border-solid border-ari-black"
         type="submit"
       />
-      {error && (
-        <span className="col-span-5 text-end pt-1 text-red-500">{error}</span>
-      )}
     </form>
   );
 };

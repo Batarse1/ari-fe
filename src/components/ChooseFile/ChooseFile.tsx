@@ -10,6 +10,7 @@ const ChooseFile: React.FC<ChooseFileProps> = ({
   accept,
   error,
   validate,
+  classes,
 }) => {
   const handleOnChangeOrigin = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -27,7 +28,7 @@ const ChooseFile: React.FC<ChooseFileProps> = ({
   };
 
   return (
-    <div className="col-span-3 flex flex-col space-y-4">
+    <div className={`${classes} flex flex-col space-y-4`}>
       <label htmlFor={name} className="capitalize color-ari-black w-fit">
         {label}
       </label>

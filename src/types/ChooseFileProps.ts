@@ -7,6 +7,7 @@ interface ChooseFileProps {
   label: string;
   placeholder: string;
   register: UseFormRegister<any>;
+  classes?: string;
   error?: FieldError | undefined;
   required?: boolean;
   minLength?: number;
