@@ -1,3 +1,7 @@
+import { useState } from "react";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import a11yLight from "react-syntax-highlighter/dist/esm/styles/hljs/a11y-light";
+
 import ChooseFileProps from "@/types/ChooseFileProps";
 
 const ChooseFile: React.FC<ChooseFileProps> = ({
@@ -12,10 +16,25 @@ const ChooseFile: React.FC<ChooseFileProps> = ({
   validate,
   classes,
 }) => {
+  const [type, setType] = useState<
+    "text/plain" | "application/json" | "application/xml" | "text/xml"
+  >("text/plain");
+
   const handleOnChangeOrigin = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
 
     const file = e.target.files[0];
+
+    if (
+      file.type === "text/plain" ||
+      file.type === "application/json" ||
+      file.type === "application/xml" ||
+      file.type === "text/xml"
+    ) {
+      setType(file.type);
+    } else {
+      setType("text/plain");
+    }
 
     const reader = new FileReader();
 
@@ -25,6 +44,13 @@ const ChooseFile: React.FC<ChooseFileProps> = ({
     };
 
     reader.readAsText(file);
+  };
+
+  const language = {
+    "text/plain": "plaintext",
+    "application/json": "json",
+    "application/xml": "xml",
+    "text/xml": "xml",
   };
 
   return (
@@ -44,8 +70,18 @@ const ChooseFile: React.FC<ChooseFileProps> = ({
         })}
         onChange={handleOnChangeOrigin}
       />
-      <div className="bg-ari-gray p-2 rounded border border-solid border-ari-black w-full min-h-[200px] whitespace-normal break-words">
-        {text}
+      <div className="border border-solid border-ari-black rounded">
+        <SyntaxHighlighter
+          language={language[type]}
+          style={a11yLight}
+          customStyle={{
+            borderRadius: "0.25rem",
+            minHeight: "200px",
+          }}
+          showLineNumbers
+        >
+          {text}
+        </SyntaxHighlighter>
       </div>
       {error && error.type === "required" && (
         <span role="alert" className="pt-1 text-red-500">
