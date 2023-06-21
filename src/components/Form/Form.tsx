@@ -1,11 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useForm, SubmitHandler, set } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
+import SyntaxHighlighter from "react-syntax-highlighter";
+import a11yLight from "react-syntax-highlighter/dist/esm/styles/hljs/a11y-light";
 
 import ChooseFile from "@/components/ChooseFile";
 import Input from "@/components/Input";
 import Select from "@/components/Select/Select";
+
+import language from "@/utils/language";
 
 import {
   secret_validation,
@@ -32,7 +36,9 @@ const Form = () => {
   const [originText, setOriginText] = useState<string>("");
   const [destinyFile, setDestinyFile] = useState<Blob>();
   const [destinyText, setDestinyText] = useState<string>("");
-  const [destinyType, setDestinyType] = useState<TypeEnum>();
+  const [destinyType, setDestinyType] = useState<
+    "text/plain" | "application/json" | "application/xml" | "text/xml"
+  >("text/plain");
   const [destinyName, setDestinyName] = useState<string>("destiny");
   const [error, setError] = useState<string>("");
 
@@ -59,16 +65,16 @@ const Form = () => {
 
     if (fromType === "text/plain" && toType === TypeEnum.JSON) {
       url += "/txt-to-json";
-      setDestinyType(TypeEnum.JSON);
+      setDestinyType("application/json");
     } else if (fromType === "text/plain" && toType === TypeEnum.XML) {
       url += "/txt-to-xml";
-      setDestinyType(TypeEnum.XML);
+      setDestinyType("text/xml");
     } else if (fromType === "text/xml" && toType === TypeEnum.TXT) {
       url += "/xml-to-txt";
-      setDestinyType(TypeEnum.TXT);
+      setDestinyType("text/plain");
     } else if (fromType === "application/json" && toType === TypeEnum.TXT) {
       url += "/json-to-txt";
-      setDestinyType(TypeEnum.TXT);
+      setDestinyType("text/plain");
     } else {
       setError(
         `You can't convert file type ${fromType} to file type ${toType}`
@@ -112,9 +118,10 @@ const Form = () => {
     link.href = window.URL.createObjectURL(destinyFile);
     link.download = destinyName;
 
-    if (destinyType === TypeEnum.JSON) link.download += ".json";
-    else if (destinyType === TypeEnum.XML) link.download += ".xml";
-    else if (destinyType === TypeEnum.TXT) link.download += ".txt";
+    if (destinyType === "application/json") link.download += ".json";
+    else if (destinyType === "application/xml" || destinyType === "text/xml")
+      link.download += ".xml";
+    else if (destinyType === "text/plain") link.download += ".txt";
 
     link.click();
 
@@ -184,8 +191,18 @@ const Form = () => {
         >
           Save as
         </button>
-        <div className="bg-ari-gray p-2 rounded border border-solid border-ari-black w-full min-h-[200px] whitespace-normal break-words">
-          {destinyText}
+        <div className="border border-solid border-ari-black rounded">
+          <SyntaxHighlighter
+            language={language[destinyType]}
+            style={a11yLight}
+            customStyle={{
+              borderRadius: "0.25rem",
+              minHeight: "200px",
+            }}
+            showLineNumbers
+          >
+            {destinyText}
+          </SyntaxHighlighter>
         </div>
       </div>
       {error && (
